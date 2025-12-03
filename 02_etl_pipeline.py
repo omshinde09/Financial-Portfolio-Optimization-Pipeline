@@ -24,6 +24,9 @@ df.show(5)
 
 # Silver Layer (Data Quality)
 from pyspark.sql.functions import col, avg, stddev, lag
+from pyspark.sql.window import Window
+
+print(df.columns)
 
 window_spec = Window.partitionBy("ticker").orderBy("Date")
 
@@ -54,5 +57,6 @@ print("✅ GOLD LAYER SAVED")
 gold_df.show(10)
 print("🎉 COMPLETE PIPELINE: Bronze → Silver → Gold")
 spark.stop()
+
 
 
