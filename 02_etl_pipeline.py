@@ -23,22 +23,28 @@ print("Spark columns:", df.columns)
 df.show(1)
 
 # Silver Layer (Data Quality)
+
+from pyspark.sql.functions import col, avg, stddev, lag
+from pyspark.sql.window import Window
+
+close_col = "Close31"  # <-- change this to the actual name from df.columns
+
 window_spec = Window.partitionBy("ticker").orderBy("Date")
 
 silver_df = (
-df
-.withColumn("CloseNum", col("Close").cast("double"))
-.filter(col("CloseNum") > 0)
-.dropDuplicates(["ticker", "Date"])
-.withColumn(
-"daily_return",
-(col("CloseNum") - lag("CloseNum", 1).over(window_spec)) /
-lag("CloseNum", 1).over(window_spec)
-)
-.withColumn(
-"ma_50",
-avg("CloseNum").over(window_spec.rowsBetween(-49, 0))
-)
+    df
+    .withColumn("CloseNum", col(close_col).cast("double"))
+    .filter(col("CloseNum").isNotNull() & (col("CloseNum") > 0))
+    .dropDuplicates(["ticker", "Date"])
+    .withColumn(
+        "daily_return",
+        (col("CloseNum") - lag("CloseNum", 1).over(window_spec)) /
+        lag("CloseNum", 1).over(window_spec)
+    )
+    .withColumn(
+        "ma_50",
+        avg("CloseNum").over(window_spec.rowsBetween(-49, 0))
+    )
 )
 
 print(f"✨ Silver: {silver_df.count()} rows")
@@ -58,6 +64,7 @@ count("Date").alias("trading_days")
 gold_df.coalesce(1).write.mode("overwrite").option("header", "true").csv("portfolio_gold")
 print("✅ Gold layer written to portfolio_gold/")
 gold_df.show(10)
+
 
 
 
