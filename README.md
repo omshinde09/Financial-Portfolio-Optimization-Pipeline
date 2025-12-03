@@ -4,7 +4,7 @@ Financial Portfolio Pipeline (Production-Ready)
 text
 yfinance API → PySpark ETL → PostgreSQL → Power BI
 
-## 🛠️ **Run It Now** (2 Minutes)
+**Run It Now**
 
 1. Clone repo
 git clone https://github.com/omkar-shinde-data/financial-portfolio-pipeline.git
