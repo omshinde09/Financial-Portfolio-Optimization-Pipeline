@@ -19,9 +19,8 @@ print("🔥 PySpark ETL Starting...")
 
 # Load Bronze Layer
 df = spark.read.option("header", "true").csv("portfolio_raw.csv")
-print("Columns:", df.columns)
-print(f"📥 Bronze: {df.count()} rows")
-df.show(5)
+print("Spark columns:", df.columns)
+df.show(1)
 
 # Silver Layer (Data Quality)
 window_spec = Window.partitionBy("ticker").orderBy("Date")
@@ -59,6 +58,7 @@ count("Date").alias("trading_days")
 gold_df.coalesce(1).write.mode("overwrite").option("header", "true").csv("portfolio_gold")
 print("✅ Gold layer written to portfolio_gold/")
 gold_df.show(10)
+
 
 
 
