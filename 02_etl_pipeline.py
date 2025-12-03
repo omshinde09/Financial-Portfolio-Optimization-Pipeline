@@ -31,16 +31,21 @@ print(df.columns)
 window_spec = Window.partitionBy("ticker").orderBy("Date")
 
 silver_df = df
-.filter(col("Close") > 0)
+.withColumn("CloseNum", col("Close1").cast("double"))
+.filter(col("CloseNum") > 0)
 .dropDuplicates(["ticker", "Date"])
 .withColumn(
 "daily_return",
-(col("Close") - lag("Close", 1).over(window_spec)) / lag("Close", 1).over(window_spec)
+(col("CloseNum") - lag("CloseNum", 1).over(window_spec)) /
+lag("CloseNum", 1).over(window_spec)
 )
 .withColumn(
 "ma_50",
-avg("Close").over(window_spec.rowsBetween(-49, 0))
+avg("CloseNum").over(window_spec.rowsBetween(-49, 0))
 )
+
+print("Silver columns:", silver_df.columns)
+silver_df.select("ticker", "Date", "CloseNum", "daily_return", "ma_50").show(10)
 
 # Gold Layer (Aggregated Metrics)
 gold_df = silver_df.groupBy("ticker") \
@@ -57,6 +62,7 @@ print("✅ GOLD LAYER SAVED")
 gold_df.show(10)
 print("🎉 COMPLETE PIPELINE: Bronze → Silver → Gold")
 spark.stop()
+
 
 
 
