@@ -23,17 +23,21 @@ print(f"📥 Bronze: {df.count()} rows")
 df.show(5)
 
 # Silver Layer (Data Quality)
-window_spec = Window.partitionBy("ticker").orderBy("Date")
-silver_df = df \
-    .filter(col("Close") > 0) \
-    .dropDuplicates(["ticker", "Date"]) \
-    .withColumn("daily_return", 
-        (col("Close") - lag("Close", 1).over(window_spec)) / lag("Close", 1).over(window_spec)) \
-    .withColumn("ma_50", 
-        avg("Close").over(window_spec.rowsBetween(-49, 0)))
+from pyspark.sql.functions import col, avg, stddev, lag
 
-print(f"✨ Silver Layer: {silver_df.count()} rows")
-silver_df.select("ticker", "Date", "Close", "daily_return", "ma_50").show(10)
+window_spec = Window.partitionBy("ticker").orderBy("Date")
+
+silver_df = df
+.filter(col("Close") > 0)
+.dropDuplicates(["ticker", "Date"])
+.withColumn(
+"daily_return",
+(col("Close") - lag("Close", 1).over(window_spec)) / lag("Close", 1).over(window_spec)
+)
+.withColumn(
+"ma_50",
+avg("Close").over(window_spec.rowsBetween(-49, 0))
+)
 
 # Gold Layer (Aggregated Metrics)
 gold_df = silver_df.groupBy("ticker") \
@@ -50,4 +54,5 @@ print("✅ GOLD LAYER SAVED")
 gold_df.show(10)
 print("🎉 COMPLETE PIPELINE: Bronze → Silver → Gold")
 spark.stop()
+
 
