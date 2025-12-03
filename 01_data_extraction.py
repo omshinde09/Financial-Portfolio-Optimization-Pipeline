@@ -44,11 +44,13 @@ for i, ticker in enumerate(tickers):
         print(f"❌ {str(e)[:30]}")
 
 # Save results
-portfolio_df = pd.concat(results, ignore_index=True)
-portfolio_df.to_csv('portfolio_raw.csv', index=False)
-portfolio_df.to_parquet('portfolio_raw.parquet', index=False)
+import os
 
-print(f"\n🎉 TOTAL: {len(portfolio_df):,} rows | Files saved!")
+cols = ["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume", "ticker"]
+portfolio_df = portfolio_df[cols]
+portfolio_df.to_csv("portfolio_raw.csv", index=False)
+
+print(f"\n TOTAL: {len(portfolio_df):,} rows | Saved: portfolio_raw.csv")
 
 # Quick visualization
 plt.figure(figsize=(12,6))
@@ -65,3 +67,4 @@ plt.savefig('portfolio_demo.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("✅ PRODUCTION PIPELINE COMPLETE")
+
