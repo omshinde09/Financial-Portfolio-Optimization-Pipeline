@@ -42,6 +42,7 @@ for i, ticker in enumerate(tickers):
         
     except Exception as e:
         print(f"❌ {str(e)[:30]}")
+portfolio_df = pd.concat(results, ignore_index=True)
 
 # Save results
 import os
@@ -67,4 +68,5 @@ plt.savefig('portfolio_demo.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("✅ PRODUCTION PIPELINE COMPLETE")
+
 
