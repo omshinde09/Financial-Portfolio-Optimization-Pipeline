@@ -42,16 +42,24 @@ for i, ticker in enumerate(tickers):
         
     except Exception as e:
         print(f"❌ {str(e)[:30]}")
+
+# Combine all ticker data
 portfolio_df = pd.concat(results, ignore_index=True)
 
-# Save results
-import os
+print("Columns in portfolio_df:", portfolio_df.columns.tolist())
 
-cols = ["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume", "ticker"]
+# Adjust column list based on actual names
+# Typical yfinance columns after reset_index:
+# ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'ticker']
+# But if 'Adj Close' is missing, drop it from the list
+
+cols = [c for c in ["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume", "ticker"]
+        if c in portfolio_df.columns]
+
 portfolio_df = portfolio_df[cols]
 portfolio_df.to_csv("portfolio_raw.csv", index=False)
 
-print(f"\n TOTAL: {len(portfolio_df):,} rows | Saved: portfolio_raw.csv")
+print(f"\nTOTAL: {len(portfolio_df):,} rows | Saved: portfolio_raw.csv")
 
 # Quick visualization
 plt.figure(figsize=(12,6))
@@ -68,5 +76,6 @@ plt.savefig('portfolio_demo.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("✅ PRODUCTION PIPELINE COMPLETE")
+
 
 
