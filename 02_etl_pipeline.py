@@ -23,15 +23,11 @@ print(f"📥 Bronze: {df.count()} rows")
 df.show(5)
 
 # Silver Layer (Data Quality)
-from pyspark.sql.functions import col, avg, stddev, lag
-from pyspark.sql.window import Window
-
-print(df.columns)
-
 window_spec = Window.partitionBy("ticker").orderBy("Date")
 
-silver_df = df
-.withColumn("CloseNum", col("Close1").cast("double"))
+silver_df = (
+df
+.withColumn("CloseNum", col("Close").cast("double"))
 .filter(col("CloseNum") > 0)
 .dropDuplicates(["ticker", "Date"])
 .withColumn(
@@ -43,25 +39,25 @@ lag("CloseNum", 1).over(window_spec)
 "ma_50",
 avg("CloseNum").over(window_spec.rowsBetween(-49, 0))
 )
+)
 
-print("Silver columns:", silver_df.columns)
+print(f"✨ Silver: {silver_df.count()} rows")
 silver_df.select("ticker", "Date", "CloseNum", "daily_return", "ma_50").show(10)
 
 # Gold Layer (Aggregated Metrics)
-gold_df = silver_df.groupBy("ticker") \
-    .agg(
-        round(avg("daily_return"), 6).alias("avg_daily_return"),
-        round(stddev("daily_return"), 6).alias("volatility"),
-        count("Date").alias("trading_days")
-    )
+gold_df = (
+silver_df
+.groupBy("ticker")
+.agg(
+avg("daily_return").alias("avg_daily_return"),
+stddev("daily_return").alias("volatility"),
+count("Date").alias("trading_days")
+)
+)
 
 gold_df.coalesce(1).write.mode("overwrite").option("header", "true").csv("portfolio_gold")
-gold_df.coalesce(1).write.mode("overwrite").parquet("portfolio_gold.parquet")
-
-print("✅ GOLD LAYER SAVED")
+print("✅ Gold layer written to portfolio_gold/")
 gold_df.show(10)
-print("🎉 COMPLETE PIPELINE: Bronze → Silver → Gold")
-spark.stop()
 
 
 
