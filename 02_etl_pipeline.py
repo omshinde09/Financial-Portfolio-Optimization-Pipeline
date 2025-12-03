@@ -7,18 +7,14 @@ Bronze → PySpark → Gold | 99.7% Quality
 import sys
 import subprocess
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
+from pyspark.sql.functions import col, avg, stddev, lag, count
 from pyspark.sql.window import Window
 
 # Auto-install PySpark
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pyspark==3.5.0'])
 
 # Production Spark
-spark = SparkSession.builder \
-    .appName("PortfolioETL") \
-    .config("spark.sql.adaptive.enabled", "true") \
-    .getOrCreate()
-
+spark = SparkSession.builder.appName("PortfolioETL").getOrCreate()
 print("🔥 PySpark ETL Starting...")
 
 # Load Bronze Layer
@@ -54,3 +50,4 @@ print("✅ GOLD LAYER SAVED")
 gold_df.show(10)
 print("🎉 COMPLETE PIPELINE: Bronze → Silver → Gold")
 spark.stop()
+
