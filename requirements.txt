@@ -1,10 +1,8 @@
 yfinance==0.2.18
-pyspark==4.0.1
 pandas==2.0.3
 numpy==1.24.3
 boto3==1.28.0
+matplotlib==3.7.2
+--no-deps pyspark==4.0.1  # Skip PySpark deps (runs in Databricks)
 psycopg2-binary==2.9.7
 pyportfolioopt==1.5.5
-matplotlib==3.7.2
-seaborn==0.12.2
-plotly==5.15.0
